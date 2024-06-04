@@ -86,10 +86,11 @@ RBDL_DLLAPI void NonlinearEffects (
  * Before calling this function one has to ensure that all other values
  * have been set to zero, e.g. by calling H.setZero().
  */
+template <typename T>
 RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
     Model& model,
     const Math::VectorNd &Q,
-    Math::MatrixNd &H,
+    Eigen::MatrixBase<T> &H,
     bool update_kinematics = true
     );
 
@@ -108,12 +109,13 @@ RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
  * \param QDDot accelerations of the internal joints (output)
  * \param f_ext External forces acting on the body in base coordinates (optional, defaults to NULL)
  */
+template <typename T>
 RBDL_DLLAPI void ForwardDynamics (
     Model &model,
     const Math::VectorNd &Q,
     const Math::VectorNd &QDot,
     const Math::VectorNd &Tau,
-    Math::VectorNd &QDDot,
+    Eigen::MatrixBase<T> &QDDot,
     std::vector<Math::SpatialVector> *f_ext = NULL
     );
 

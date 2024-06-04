@@ -138,11 +138,12 @@ RBDL_DLLAPI Math::Matrix3d CalcBodyWorldOrientation (
  * have been set to zero, e.g. by calling G.setZero().
  *
  */ 
+template <typename T>
 RBDL_DLLAPI void CalcPointJacobian (Model &model,
     const Math::VectorNd &Q,
     unsigned int body_id,
     const Math::Vector3d &point_position,
-    Math::MatrixNd &G,
+    Eigen::MatrixBase<T> &G,
     bool update_kinematics = true
     );
 
@@ -166,11 +167,12 @@ RBDL_DLLAPI void CalcPointJacobian (Model &model,
  * have been set to zero, e.g. by calling G.setZero().
  *
  */ 
+template <typename T>
 RBDL_DLLAPI void CalcPointJacobian6D (Model &model,
     const Math::VectorNd &Q,
     unsigned int body_id,
     const Math::Vector3d &point_position,
-    Math::MatrixNd &G,
+    Eigen::MatrixBase<T> &G,
     bool update_kinematics = true
     );
 

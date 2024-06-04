@@ -169,10 +169,11 @@ RBDL_DLLAPI void NonlinearEffects (
   }
 }
 
+template <typename T>
 RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
     Model& model,
     const VectorNd &Q,
-    MatrixNd &H,
+    Eigen::MatrixBase<T> &H,
     bool update_kinematics) {
   LOG << "-------- " << __func__ << " --------" << std::endl;
 
@@ -217,8 +218,8 @@ RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
               << model.multdof3_S[j] << std::endl;
             LOG << H_temp2.transpose() << std::endl;
 
-            H.block<1,3>(dof_index_i,dof_index_j) = H_temp2.transpose();
-            H.block<3,1>(dof_index_j,dof_index_i) = H_temp2;
+            H.template block<1,3>(dof_index_i,dof_index_j) = H_temp2.transpose();
+            H.template block<3,1>(dof_index_j,dof_index_i) = H_temp2;
           }
         } else if (model.mJoints[j].mJointType == JointTypeCustom){        
           unsigned int k      = model.mJoints[j].custom_joint_index;
@@ -239,7 +240,7 @@ RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
     } else if (model.mJoints[i].mDoFCount == 3
         && model.mJoints[i].mJointType != JointTypeCustom) {
       Matrix63 F_63 = model.Ic[i].toMatrix() * model.multdof3_S[i];
-      H.block<3,3>(dof_index_i, dof_index_i) = model.multdof3_S[i].transpose() * F_63;
+      H.template block<3,3>(dof_index_i, dof_index_i) = model.multdof3_S[i].transpose() * F_63;
 
       unsigned int j = i;
       unsigned int dof_index_j = dof_index_i;
@@ -253,13 +254,13 @@ RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
           if (model.mJoints[j].mDoFCount == 1) {
             Vector3d H_temp2 = F_63.transpose() * (model.S[j]);
 
-            H.block<3,1>(dof_index_i,dof_index_j) = H_temp2;
-            H.block<1,3>(dof_index_j,dof_index_i) = H_temp2.transpose();
+            H.template block<3,1>(dof_index_i,dof_index_j) = H_temp2;
+            H.template block<1,3>(dof_index_j,dof_index_i) = H_temp2.transpose();
           } else if (model.mJoints[j].mDoFCount == 3) {
             Matrix3d H_temp2 = F_63.transpose() * (model.multdof3_S[j]);
 
-            H.block<3,3>(dof_index_i,dof_index_j) = H_temp2;
-            H.block<3,3>(dof_index_j,dof_index_i) = H_temp2.transpose();
+            H.template block<3,3>(dof_index_i,dof_index_j) = H_temp2;
+            H.template block<3,3>(dof_index_j,dof_index_i) = H_temp2.transpose();
           }
         } else if (model.mJoints[j].mJointType == JointTypeCustom){
           unsigned int k = model.mJoints[j].custom_joint_index;
@@ -317,12 +318,25 @@ RBDL_DLLAPI void CompositeRigidBodyAlgorithm (
   }
 }
 
+template RBDL_DLLAPI void CompositeRigidBodyAlgorithm<Eigen::Matrix<double, 6, 6>>(Model& model,
+    const Math::VectorNd &Q,
+    Eigen::MatrixBase<Eigen::Matrix<double, 6, 6>> &H,
+    bool update_kinematics = true
+    );
+
+template RBDL_DLLAPI void CompositeRigidBodyAlgorithm<Eigen::MatrixXd>(Model& model,
+    const Math::VectorNd &Q,
+    Eigen::MatrixBase<Eigen::MatrixXd> &H,
+    bool update_kinematics = true
+    );
+
+template <typename T>
 RBDL_DLLAPI void ForwardDynamics (
     Model &model,
     const VectorNd &Q,
     const VectorNd &QDot,
     const VectorNd &Tau,
-    VectorNd &QDDot,
+    Eigen::MatrixBase<T> &QDDot,
     std::vector<SpatialVector> *f_ext) {
   LOG << "-------- " << __func__ << " --------" << std::endl;
 
@@ -558,6 +572,24 @@ RBDL_DLLAPI void ForwardDynamics (
 
   LOG << "QDDot = " << QDDot.transpose() << std::endl;
 }
+
+template
+RBDL_DLLAPI void ForwardDynamics<Eigen::Vector<double, 6>> (
+    Model &model,
+    const VectorNd &Q,
+    const VectorNd &QDot,
+    const VectorNd &Tau,
+    Eigen::MatrixBase<Eigen::Vector<double, 6>> &QDDot,
+    std::vector<SpatialVector> *f_ext);
+
+template
+RBDL_DLLAPI void ForwardDynamics<Eigen::VectorXd> (
+    Model &model,
+    const VectorNd &Q,
+    const VectorNd &QDot,
+    const VectorNd &Tau,
+    Eigen::MatrixBase<Eigen::VectorXd> &QDDot,
+    std::vector<SpatialVector> *f_ext);
 
 RBDL_DLLAPI void ForwardDynamicsLagrangian (
     Model &model,

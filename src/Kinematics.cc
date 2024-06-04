@@ -221,7 +221,7 @@ RBDL_DLLAPI Vector3d CalcBaseToBodyCoordinates (
 
 RBDL_DLLAPI Matrix3d CalcBodyWorldOrientation(
     Model &model,
-    const VectorNd &Q,
+    const Math::VectorNd &Q,
     const unsigned int body_id,
     bool update_kinematics) {
   // update the Kinematics if necessary
@@ -241,12 +241,13 @@ RBDL_DLLAPI Matrix3d CalcBodyWorldOrientation(
   return model.X_base[body_id].E;
 }
 
+template <typename T>
 RBDL_DLLAPI void CalcPointJacobian (
     Model &model,
     const VectorNd &Q,
     unsigned int body_id,
     const Vector3d &point_position,
-    MatrixNd &G,
+    Eigen::MatrixBase<T> &G,
     bool update_kinematics) {
   LOG << "-------- " << __func__ << " --------" << std::endl;
 
@@ -305,12 +306,31 @@ RBDL_DLLAPI void CalcPointJacobian (
   }
 }
 
+template
+RBDL_DLLAPI void CalcPointJacobian<Eigen::Matrix<double, 6, 6>> (Model &model,
+    const Math::VectorNd &Q,
+    unsigned int body_id,
+    const Math::Vector3d &point_position,
+    Eigen::MatrixBase<Eigen::Matrix<double, 6, 6>> &G,
+    bool update_kinematics = true
+    );
+    
+template
+RBDL_DLLAPI void CalcPointJacobian<Eigen::MatrixXd> (Model &model,
+    const Math::VectorNd &Q,
+    unsigned int body_id,
+    const Math::Vector3d &point_position,
+    Eigen::MatrixBase<Eigen::MatrixXd> &G,
+    bool update_kinematics = true
+    );
+
+template <typename T>
 RBDL_DLLAPI void CalcPointJacobian6D (
     Model &model,
     const VectorNd &Q,
     unsigned int body_id,
     const Vector3d &point_position,
-    MatrixNd &G,
+    Eigen::MatrixBase<T> &G,
     bool update_kinematics) {
   LOG << "-------- " << __func__ << " --------" << std::endl;
 
@@ -366,6 +386,24 @@ RBDL_DLLAPI void CalcPointJacobian6D (
     j = model.lambda[j];
   }
 }
+
+template
+RBDL_DLLAPI void CalcPointJacobian6D <Eigen::Matrix<double, 6, 6>>(
+    Model &model,
+    const VectorNd &Q,
+    unsigned int body_id,
+    const Vector3d &point_position,
+    Eigen::MatrixBase<Eigen::Matrix<double, 6, 6>> &G,
+    bool update_kinematics);
+
+template
+RBDL_DLLAPI void CalcPointJacobian6D <Eigen::MatrixXd>(
+    Model &model,
+    const VectorNd &Q,
+    unsigned int body_id,
+    const Vector3d &point_position,
+    Eigen::MatrixBase<Eigen::MatrixXd> &G,
+    bool update_kinematics);
 
 RBDL_DLLAPI void CalcBodySpatialJacobian (
     Model &model,
